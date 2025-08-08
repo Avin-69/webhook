@@ -4,9 +4,12 @@ import os
 
 app = Flask(__name__)
 
-@app.route('/lead', methods=['POST'])
+# Root route to accept POST webhook
+@app.route("/", methods=["POST"])
 def receive_lead():
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No JSON received"}), 400
 
     try:
         conn = psycopg2.connect(
@@ -30,8 +33,17 @@ def receive_lead():
         conn.commit()
         cur.close()
         conn.close()
-        return jsonify({"status": "success"}), 200
 
+        return jsonify({"message": "Lead received successfully!"}), 200
     except Exception as e:
-        print("ERROR:", str(e))
-        return jsonify({"status": "error", "message": str(e)}), 500
+        print("Error inserting lead:", e)
+        return jsonify({"error": str(e)}), 500
+
+# Optional GET route to verify it's alive
+@app.route("/", methods=["GET"])
+def index():
+    return "Webhook is alive!", 200
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
+
