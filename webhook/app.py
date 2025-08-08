@@ -9,13 +9,14 @@ def receive_lead():
     data = request.json
 
     try:
-        conn = psycopg2.connect(
-            host=os.environ['SUPABASE_HOST'],
-            dbname=os.environ['SUPABASE_DB'],
-            user=os.environ['SUPABASE_USER'],
-            password=os.environ['SUPABASE_PASSWORD'],
-            port=5432
-        )
+       conn = psycopg2.connect(
+    host=os.environ['SUPABASE_HOST'],
+    port=os.environ.get('SUPABASE_PORT', 5432),
+    dbname=os.environ['SUPABASE_DB'],
+    user=os.environ['SUPABASE_USER'],
+    password=os.environ['SUPABASE_PASSWORD']
+)
+
 
         cur = conn.cursor()
         cur.execute("""
@@ -37,3 +38,4 @@ def receive_lead():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
